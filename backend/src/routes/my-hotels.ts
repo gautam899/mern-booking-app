@@ -2,7 +2,8 @@
 import express, { Request, Response } from "express";
 import multer from "multer";
 import cloudinary from "cloudinary";
-import Hotel, { HotelType } from "../models/hotels";
+import Hotel from "../models/hotels";
+import { HotelType } from "../shared/types";
 import verifyToken from "../middleware/auth";
 import { body } from "express-validator";
 const router = express.Router();
@@ -22,14 +23,19 @@ router.post(
   "/",
   verifyToken,
   [
-    body("name").notEmpty().withMessage('Name is required'),
-    body("city").notEmpty().withMessage('City is required'),
-    body("country").notEmpty().withMessage('Country is required'),
-    body("description").notEmpty().withMessage('Description is required'),
-    body("type").notEmpty().withMessage('Hotel type is required'),
-    body("pricePerNight").notEmpty().isNumeric().withMessage('Price per Night is required and must be number'),
-    body("facility").notEmpty().isArray().withMessage('Facilities are required'),
-
+    body("name").notEmpty().withMessage("Name is required"),
+    body("city").notEmpty().withMessage("City is required"),
+    body("country").notEmpty().withMessage("Country is required"),
+    body("description").notEmpty().withMessage("Description is required"),
+    body("type").notEmpty().withMessage("Hotel type is required"),
+    body("pricePerNight")
+      .notEmpty()
+      .isNumeric()
+      .withMessage("Price per Night is required and must be number"),
+    body("facility")
+      .notEmpty()
+      .isArray()
+      .withMessage("Facilities are required"),
   ],
   upload.array("imageFiles", 6),
   async (req: Request, res: Response) => {
@@ -70,4 +76,16 @@ router.post(
   }
 );
 
+// Now lets create the api endpoint for the my hotels page.
+// Also we need to verify token before proceeding with creating the myhotels page.
+router.get("/", verifyToken, async (req: Request, res: Response) => {
+  // Get the user id from the request body and find that user Id to return the myhotels
+
+  try {
+    const hotels = await Hotel.find({ userId: req.userId });
+    res.json(hotels);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching hotels" });
+  }
+});
 export default router;

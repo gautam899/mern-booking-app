@@ -1,23 +1,8 @@
 // Create a typescript type.
 
 import mongoose from "mongoose";
+import { HotelType } from "../shared/types";
 
-export interface HotelType {
-  _id: string;
-  userId: string;
-  name: string;
-  city: string;
-  country: string;
-  description: string;
-  type: string; 
-  adultCount: number;
-  childCount: number;
-  facilities: string[];
-  pricePerNight: number;
-  starRating: number;
-  imageUrls: string[];
-  lastUpdated: Date;
-}
 
 // Create scheme
 const hotelSchema = new mongoose.Schema<HotelType>({
@@ -25,6 +10,7 @@ const hotelSchema = new mongoose.Schema<HotelType>({
   name: { type: String, required: true },
   city: { type: String, required: true },
   country: { type: String, required: true },
+  description: { type: String, required: true },
   type: { type: String, required: true },
   adultCount: { type: Number, required: true },
   childCount: { type: Number, required: true },

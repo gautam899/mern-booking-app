@@ -1,6 +1,6 @@
 import { RegisterFormData } from "./pages/Register";
 import { SignInFormData } from "./pages/SignIn";
-
+import {HotelType} from "../../backend/src/shared/types";
 // The reason why we have added the pipe and the empty quotes at the end is because the api base url is need when
 //the frontend and the backend are on the seperate server. But whenever we have our backend  and frontend bundled for production when we have the frontend and the backend on same server then we
 //do not need to api-base url.
@@ -63,16 +63,30 @@ export const signOut = async () => {
 };
 // We will call the above fetch request from the button in the header in the frontend
 
-export const addMyHotel = async (hotelFormData:FormData)=>{
-  const response = await fetch(`${API_BASE_URL}/api/my-hotels`,{
-    method:"POST",
-    credentials:"include",
+export const addMyHotel = async (hotelFormData: FormData) => {
+  const response = await fetch(`${API_BASE_URL}/api/my-hotels`, {
+    method: "POST",
+    credentials: "include",
     body: hotelFormData,
   });
 
-  if(!response.ok){
+  if (!response.ok) {
     throw new Error("Failed to add hotel");
   }
 
   return response.json();
-}
+};
+
+export const fetchMyHotels = async (): Promise<HotelType[]>=> {
+  const response = await fetch(`${API_BASE_URL}/api/my-hotels`,{
+    credentials:"include"
+  });
+  
+  // If the response in not okay then we are going to throw a generic error.
+  if(!response.ok){
+    throw new Error("Error fetching hotels");
+  }
+
+  //If everything went well then we are going to get an array hotels back in the body of res
+  return response.json();
+};

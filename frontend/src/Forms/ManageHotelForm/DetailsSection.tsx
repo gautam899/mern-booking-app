@@ -2,11 +2,12 @@ import { useFormContext } from "react-hook-form"
 import { HotelFormData } from "./ManageHotelForm";
 
 const DetailsSection = () => {
-
-    const { register, formState: { errors } } = useFormContext<HotelFormData>();
+    const { 
+        register, 
+        formState: { errors },
+     } = useFormContext<HotelFormData>();
     return (
         <div className="flex flex-col gap-4">
-            {/* This line is giving a error where the testing says cannot find locator name */}
             <h1 className="text-3xl font-bold mb-3">Add Hotel</h1>
             <label className="text-gray-700 text-sm font-bold flex-1">Name
                 <input type="text" className="border rounded w-full py-1 px-2 font-normal" {
@@ -17,11 +18,15 @@ const DetailsSection = () => {
                         <span className="text-red-500">{errors.name.message} </span>
                     )
                 }
-            </label>
-
+            
+            
+            </label>            
+            
             <div className="flex gap-4">
                 <label className="text-gray-700 text-sm font-bold flex-1">City
-                    <input type="text" className="border rounded w-full py-1 px-2 font-normal" {
+                    <input 
+                    type="text" 
+                    className="border rounded w-full py-1 px-2 font-normal" {
                         ...register("city", { required: "This field is required" })
                     }></input>
                     {
@@ -42,14 +47,13 @@ const DetailsSection = () => {
                 </label>
             </div>
 
-            {/* Now we need a description field */}
             <label className="text-gray-700 text-sm font-bold flex-1">Description
                 <textarea rows={10} className="border rounded w-full py-1 px-2 font-normal" {
                     ...register("description", { required: "This field is required" })
                 }></textarea>
                 {
                     errors.description && (
-                        <span className="text-red-500">{errors.description.message} </span>
+                        <span className="text-red-500">{errors.description.message}</span>
                     )
                 }
             </label>
@@ -65,7 +69,6 @@ const DetailsSection = () => {
                 }
             </label>
 
-            {/* NOw we need to put a rating input feild */}
             <label className="text-gray-700 text-sm font-bold max-w-[50%]">Star Rating
                 <select {...register("starRating", {
                     required: "This field is required",
