@@ -1,6 +1,7 @@
 import { RegisterFormData } from "./pages/Register";
 import { SignInFormData } from "./pages/SignIn";
-import {HotelType} from "../../backend/src/shared/types";
+import { HotelType } from "../../backend/src/shared/types";
+// import { hotelFacilities } from "./config/hotel-options-config";
 // The reason why we have added the pipe and the empty quotes at the end is because the api base url is need when
 //the frontend and the backend are on the seperate server. But whenever we have our backend  and frontend bundled for production when we have the frontend and the backend on same server then we
 //do not need to api-base url.
@@ -77,16 +78,43 @@ export const addMyHotel = async (hotelFormData: FormData) => {
   return response.json();
 };
 
-export const fetchMyHotels = async (): Promise<HotelType[]>=> {
-  const response = await fetch(`${API_BASE_URL}/api/my-hotels`,{
-    credentials:"include"
+export const fetchMyHotels = async (): Promise<HotelType[]> => {
+  const response = await fetch(`${API_BASE_URL}/api/my-hotels`, {
+    credentials: "include",
   });
-  
+
   // If the response in not okay then we are going to throw a generic error.
-  if(!response.ok){
+  if (!response.ok) {
     throw new Error("Error fetching hotels");
   }
 
   //If everything went well then we are going to get an array hotels back in the body of res
+  return response.json();
+};
+
+// when the component will call the fetchMyHotelById function it will get a promise with a single hotel in it.
+export const fetchMyHotelById = async (hotelId: string): Promise<HotelType> => {
+  const response = await fetch(`${API_BASE_URL}/api/my-hotels/${hotelId}`, {
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Error fetching error");
+  }
+  return response.json();
+};
+
+// Create a fetch request for the update hotel after edit
+export const updateMyHotelById = async (hotelFormData: FormData) => {
+  const response = await fetch(
+    `${API_BASE_URL}/api/my-hotels/${hotelFormData.get("hotelId")}`,
+    {
+      method:"PUT",
+      body:hotelFormData,
+      credentials:"include",
+    }
+  );
+  if(!response.ok){
+    throw new Error("Failed to update hotel");
+  }
   return response.json();
 };

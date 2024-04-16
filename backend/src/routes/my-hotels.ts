@@ -2,10 +2,10 @@
 import express, { Request, Response } from "express";
 import multer from "multer";
 import cloudinary from "cloudinary";
-import Hotel from "../models/hotels";
-import { HotelType } from "../shared/types";
+import Hotel from "../models/hotel";
 import verifyToken from "../middleware/auth";
 import { body } from "express-validator";
+import { HotelType } from "../shared/types";
 const router = express.Router();
 
 const storage = multer.memoryStorage(); //Store any files that we get from push request in the memory.
@@ -32,7 +32,7 @@ router.post(
       .notEmpty()
       .isNumeric()
       .withMessage("Price per Night is required and must be number"),
-    body("facility")
+    body("facilities")
       .notEmpty()
       .isArray()
       .withMessage("Facilities are required"),
@@ -50,16 +50,7 @@ router.post(
 
       // Step 1: Iterate the image files and map through each image and convert it into base64 string.
       // convert the image into a string that describes the image and upload it to the cloudinary and if everything goes well then we return the url from the cloudinary.
-      const uploadPromises = imageFiles.map(async (image) => {
-        const b64 = Buffer.from(image.buffer).toString("base64");
-        // Now attach the type image whether jpeg or png to the base64 string to tell cloudinary about the type of the strings.
-        let dataURI = "data:" + image.mimetype + ";base64," + b64;
-        const res = await cloudinary.v2.uploader.upload(dataURI);
-        return res.url;
-      });
-      //   Step 2:
-      // We will wait till all the images are uploaded before we get string array getting assigned to the imageurl variable.
-      const imageUrls = await Promise.all(uploadPromises);
+      const imageUrls = await uploadImages(imageFiles); //Upload image function that takes our image files and return the image urls.
       newHotel.imageUrls = imageUrls;
       newHotel.lastUpdated = new Date();
       newHotel.userId = req.userId; //Get the userId from the auth token
@@ -70,7 +61,7 @@ router.post(
       //Step 4:
       res.status(201).send(hotel);
     } catch (e) {
-      console.log("Error creating hotel: ", e);
+      console.log(e);
       res.status(500).json({ message: "Something went wrong" });
     }
   }
@@ -88,4 +79,79 @@ router.get("/", verifyToken, async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error fetching hotels" });
   }
 });
+
+router.get("/:id", verifyToken, async (req: Request, res: Response) => {
+  //api/my-hotels/9876543210
+  const id = req.params.id.toString();
+  try {
+    const hotel = await Hotel.findOne({
+      _id: id, //hotel id
+      userId: req.userId, //Logged in user id
+    });
+    res.json(hotel);
+  } catch (error) {
+    res.status(500).json({ message: "Error Fetching hotels" });
+  }
+});
+
+router.put(
+  "/:hotelId",
+  verifyToken,
+  upload.array("imageFiles"),
+  async (req: Request, res: Response) => {
+    try {
+      // Now we need to make the changes in the backend when delete the pics in the edithotel page of our app. It will be kind of similar to a post request since
+      //we are posting a change in the database
+      const updatedHotel: HotelType = req.body;
+      updatedHotel.lastUpdated = new Date();
+
+      const hotel = await Hotel.findOneAndUpdate(
+        {
+          _id: req.params.hotelId,
+          userId: req.userId,
+        },
+        updatedHotel,
+        { new: true }
+      );
+
+      if (!hotel) {
+        return res.status(404).json({ message: "Hotel not found" });
+      }
+      const files = req.files as Express.Multer.File[];
+
+      const updatedImageUrls = await uploadImages(files); //This will upload the new images to the cloudinary and it will give us back the new url's as
+
+      //add this our new hotel object
+      hotel.imageUrls = [
+        ...updatedImageUrls,
+        ...(updatedHotel.imageUrls || []),
+      ]; //... used for spreading.
+      await hotel.save();
+
+      res.status(201).json(hotel); //request completes as well and sends the hotel back as a json object.
+    } catch (error) {
+      res.status(500).json({ message: "Something went wrong" });
+    }
+  }
+);
+
+async function uploadImages(imageFiles: Express.Multer.File[]) {
+  const uploadPromises = imageFiles.map(async (image) => {
+    // Now before uploading the image we first need to convert the image buffer to base64 string. This is
+    //a common way to encode the binary data, like an image into a string format that can be easily transmitted.
+    const b64 = Buffer.from(image.buffer).toString("base64");
+    // Now attach the type image whether jpeg or png to the base64 string to tell cloudinary about the type of the strings.
+    let dataURI = "data:" + image.mimetype + ";base64," + b64;
+    // Now upload the image to the cloudinary using the method of cloudinary.v2.uploader object. This method returns a promise that resolve to the result of the upload operation.
+    const res = await cloudinary.v2.uploader.upload(dataURI);
+    // the result of the uploaded operation is an object is url, which is the url of the uploaded
+    return res.url;
+  });
+  //   Step 2:
+  // We will wait till all the images are uploaded before we get string array getting assigned to the imageurl variable.
+  //Basically we are waiting for all the promises to get resolved.
+  const imageUrls = await Promise.all(uploadPromises); //This return a array of urls of the uploaded images. and we finally return this array of urls.
+  return imageUrls;
+}
+
 export default router;

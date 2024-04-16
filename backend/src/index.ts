@@ -10,7 +10,7 @@ import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import path from "path";
 import { v2 as cloudinary } from "cloudinary";
-import { Request,Response } from "express";
+import { Request, Response } from "express";
 // Start our connection to the cloudinary from the backend server.
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -41,12 +41,12 @@ app.use("/api/auth", authRoutes);
 // Any request that comes to the api which is prefixed with /api/users pass them to the user routes and inside the users.ts we have the handles for that request.
 app.use("/api/users", userRoutes);
 // create a new route that can help us to create a new hotel
-app.use("/api/my-hotels",myHotelRoutes);
+app.use("/api/my-hotels", myHotelRoutes);
 
 // all the request that are not api routes go the index.html of the frontend.
-app.get("*",(req:Request,res:Response)=>{
-  res.sendFile(path.join(__dirname,"../../frontend/dist/index.html"));
-})
+app.get("*", (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, "../../frontend/dist/index.html"));
+});
 app.listen(7000, () => {
-  console.log("Server is running on port 7000");
+  console.log("Server is running on port:7000");
 });

@@ -1,7 +1,7 @@
 import { useFormContext } from "react-hook-form";
 import { HotelFormData } from "./ManageHotelForm";
 
-const GuestSection = () => {
+const GuestsSection = () => {
     const { register, formState: { errors }, } = useFormContext<HotelFormData>();
 
     return (
@@ -35,4 +35,4 @@ const GuestSection = () => {
         </div>
     )
 }
-export default GuestSection;
+export default GuestsSection;
