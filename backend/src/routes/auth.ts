@@ -40,7 +40,7 @@ router.post(
       }
 
       // create a access token.
-      const token = jwt.sign(
+      const token = jwt.sign( 
         {
           userId: user.id,
         },

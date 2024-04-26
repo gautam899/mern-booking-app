@@ -4,6 +4,7 @@ import App from './App.tsx'
 import './index.css'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { AppContextProvider } from './contexts/AppContext.tsx'
+import { SearchContextProvider } from './contexts/SearchContext.tsx'
 
 // If there is an error then the react query will do a retry.
 //There pros of this is that if the server is dying slowly then the server will come up by itself.
@@ -21,7 +22,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <AppContextProvider>
-        <App />
+        <SearchContextProvider>
+          <App />
+        </SearchContextProvider>
       </AppContextProvider>
     </QueryClientProvider>
   </React.StrictMode>,

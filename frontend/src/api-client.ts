@@ -1,6 +1,6 @@
 import { RegisterFormData } from "./pages/Register";
 import { SignInFormData } from "./pages/SignIn";
-import { HotelType } from "../../backend/src/shared/types";
+import { HotelSearchResponse, HotelType } from "../../backend/src/shared/types";
 // import { hotelFacilities } from "./config/hotel-options-config";
 // The reason why we have added the pipe and the empty quotes at the end is because the api base url is need when
 //the frontend and the backend are on the seperate server. But whenever we have our backend  and frontend bundled for production when we have the frontend and the backend on same server then we
@@ -108,13 +108,70 @@ export const updateMyHotelById = async (hotelFormData: FormData) => {
   const response = await fetch(
     `${API_BASE_URL}/api/my-hotels/${hotelFormData.get("hotelId")}`,
     {
-      method:"PUT",
-      body:hotelFormData,
-      credentials:"include",
+      method: "PUT",
+      body: hotelFormData,
+      credentials: "include",
     }
   );
-  if(!response.ok){
+  if (!response.ok) {
     throw new Error("Failed to update hotel");
   }
   return response.json();
 };
+
+//Here we will define a type for a our search parameter
+export type SearchParams = {
+  destination?: string;
+  checkIn?: string;
+  checkOut?: string;
+  adultCount?: string;
+  childCount?: string;
+  page?: string;
+  facilities?: string[];
+  types?: string[];
+  stars?: string[];
+  maxPrice?: string;
+  sortOptions?: string;
+};
+
+export const searchHotels = async (
+  searchParams: SearchParams
+): Promise<HotelSearchResponse> => {
+  const queryParams = new URLSearchParams();
+  queryParams.append("destination", searchParams.destination || ""); //optional because the user can also view all the hotels also.
+  queryParams.append("checkIn", searchParams.checkIn || "");
+  queryParams.append("checkOut", searchParams.checkOut || "");
+  queryParams.append("adultCount", searchParams.adultCount || "");
+  queryParams.append("childCount", searchParams.childCount || "");
+  queryParams.append("page", searchParams.page || "");
+
+
+  queryParams.append("maxPrice", searchParams.maxPrice || "");
+  queryParams.append("sortOption", searchParams.sortOptions || "");
+
+  searchParams.facilities?.forEach((facility) =>
+    queryParams.append("facilities", facility)
+  );
+  searchParams.types?.forEach((type) => queryParams.append("types", type));
+  searchParams.types?.forEach((star) => queryParams.append("stars", star));
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/hotels/search?${queryParams}`
+  );
+  if (!response.ok) {
+    throw new Error("Error Fetching hotels");
+  }
+  return response.json();
+};
+
+
+// Fetch request for the details page on the search hotel page.
+export const fetchHotelById = async(hotelId:string):Promise<HotelType>=>{
+  const response = await fetch(`${API_BASE_URL}/api/hotels/${hotelId}`)
+
+  if(!response.ok){
+    throw new Error("Error fetching Hotels");
+  }
+
+  return response.json();
+}

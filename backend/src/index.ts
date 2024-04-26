@@ -6,6 +6,7 @@ import "dotenv/config";
 import userRoutes from "./routes/users";
 import authRoutes from "./routes/auth";
 import myHotelRoutes from "./routes/my-hotels";
+import hotelRoutes from "./routes/hotels";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import path from "path";
@@ -43,6 +44,8 @@ app.use("/api/users", userRoutes);
 // create a new route that can help us to create a new hotel
 app.use("/api/my-hotels", myHotelRoutes);
 
+// Add the api end point for the search
+app.use("/api/hotels",hotelRoutes);
 // all the request that are not api routes go the index.html of the frontend.
 app.get("*", (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "../../frontend/dist/index.html"));

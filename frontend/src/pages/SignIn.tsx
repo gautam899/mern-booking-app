@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form"
 import { useMutation, useQueryClient } from "react-query";
 import * as apiClient from "../api-client";
 import { useAppContext } from "../contexts/AppContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 // Define the signin type form which will define the type of the data that the form wil carry
 export type SignInFormData = {
     email: string;
@@ -17,7 +17,7 @@ const SignIn = () => {
 
     const { showToast } = useAppContext();
     // The < SignInFormData > is a TypeScript generic that tells the hook what the shape of the form data will be.This is useful for type checking and autocompletion in your code editor.
-
+    const location = useLocation();
     const { register, formState: { errors }, handleSubmit } = useForm<SignInFormData>();
     // Now we need to call the sign in function whenever the use submits the valid form. The function is created in api-client.
     //To do that we will make use of useMutation (because we are creating something at the backend)
@@ -29,7 +29,9 @@ const SignIn = () => {
             console.log("User has been Signed in");
             showToast({ message: "Sign in Successfull", type: "SUCCESS" });
             await queryClient.invalidateQueries("validateToken");
-            navigate("/");
+            //Now when we log in we will navigate the user to the location that was 
+            //saved if there is one. Otherwise we will just navigate the user to home page.
+            navigate(location.state?.from?.pathname || "/");
 
         },
         onError: (error: Error) => {
